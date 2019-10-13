@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio-kv
+  labels:
+    app: minio-kv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio-kv
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: minio-kv
+      labels:
+        app: minio-kv
+    spec:
+      - name: minio-kv
+        image: alexellis2/minio-kv:0.2.0
+        imagePullPolicy: Always
+        env:
+          - name: ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: minio
+                key: minio-access-key
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: minio
+                key: minio-secret-key
+          - name: host
+            value: # Put in the DNS entry for the minio service
+        command:
+          - minio-kv
+          # - --token=$TOKEN
+        ports:
+        - containerPort: 8080
+          protocol: TCP

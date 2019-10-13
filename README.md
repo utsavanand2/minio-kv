@@ -76,6 +76,42 @@ curl localhost:8081/get-blob-stream/test > big-file-out.img
 diff big-file.img big-file-out.img
 ```
 
+## Running on Kubernetes
+
+**Create MINIO_ACCESS_KEY, MINIO_SECRET_KEY environment variables**
+```
+ACCESS_KEY=$(head -c 12 /dev/urandom | shasum | cut -d  ' ' -f1)
+SECRET_KEY=$(head -c 12 /dev/urandom | shasum | cut -d  ' ' -f1)
+```
+**(If Helm is not installed)**
+Follow the instructions [here](https://github.com/openfaas/faas-netes/blob/master/HELM.md).
+
+**Install Minio with Helm**
+```
+helm install --name minio --namespace default \
+   --set accessKey="$ACCESS_KEY" \
+   --set secretKey="$SECRET_KEY" \
+   --set replicas=1 \
+   --set persistence.enabled=false \
+   --set service.port=9000 \
+   --set service.type=ClusterIP \
+stable/minio
+```
+
+**Create secrets out of the above env vars**
+```
+kubectl create secret generic minio \
+--from-literal=minio-access-key=$ACCESS_KEY \
+--from-literal=minio-secret-key=$SECRET_KEY
+```
+
+**Update the DNS entry for the minio service of type ClusterIP in yaml/deployment.yaml file**
+
+**Create the kubernetes deployment, service, and the persistent volume claims**
+```
+kubectl apply -f yaml/
+```
+
 ## License
 
 MIT, Alex Ellis 2017-2019
