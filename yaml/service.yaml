@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: minio-kv-svc
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
   - name: http
     port: 80
